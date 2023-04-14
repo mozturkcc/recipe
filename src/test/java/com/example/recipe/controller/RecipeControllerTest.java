@@ -6,9 +6,7 @@ import com.example.recipe.domain.Ingredient;
 import com.example.recipe.domain.Instruction;
 import com.example.recipe.domain.Recipe;
 import com.example.recipe.domain.RecipeType;
-import com.example.recipe.dto.IngredientDTO;
-import com.example.recipe.dto.InstructionDTO;
-import com.example.recipe.dto.RecipeDTO;
+import com.example.recipe.dto.*;
 import com.example.recipe.mapper.IngredientMapper;
 import com.example.recipe.mapper.InstructionMapper;
 import com.example.recipe.mapper.RecipeMapper;
@@ -92,6 +90,19 @@ public class RecipeControllerTest {
 
     private Instruction createInstruction(String instruction){
         return InstructionMapper.MAPPER.map(createInstructionDTO(instruction));
+    }
+    IngredientSearchDTO createIngredientSearchDTO(String name, Boolean contains){
+        IngredientSearchDTO ingredientSearchDTO = new IngredientSearchDTO();
+        ingredientSearchDTO.setContains(contains);
+        ingredientSearchDTO.setName(name);
+        return ingredientSearchDTO;
+    }
+
+    InstructionSearchDTO createInstructionSearchDTO(String instruction, Boolean contains){
+        InstructionSearchDTO instructionSearchDTO = new InstructionSearchDTO();
+        instructionSearchDTO.setContains(contains);
+        instructionSearchDTO.setInstruction(instruction);
+        return instructionSearchDTO;
     }
 
     public RecipeDTO createEntity(){
@@ -194,6 +205,58 @@ public class RecipeControllerTest {
         assertThat(recipeDTOList).isEqualTo(recipeDTOListService);
     }
 
+    @Test
+    @Transactional
+    void getAllBySearchDTO() throws Exception {
+        // Initialize the database
+        RecipeDTO createdRecipeDTO = recipeService.create(recipeDTO);
+
+        RecipeSearchDTO recipeSearchDTO = new RecipeSearchDTO();
+        List<InstructionSearchDTO> instructionSearchDTOList = new ArrayList<>();
+        instructionSearchDTOList.add(createInstructionSearchDTO("oven",true));
+        List<IngredientSearchDTO> ingredientSearchDTOS =new ArrayList<>();
+        ingredientSearchDTOS.add(createIngredientSearchDTO("potatoes",true));
+        ingredientSearchDTOS.add(createIngredientSearchDTO("meat",false));
+        recipeSearchDTO.setInstructions(instructionSearchDTOList);
+        recipeSearchDTO.setIngredients(ingredientSearchDTOS);
+
+        // Get all the ingredientList
+        MvcResult result = restMockMvc
+                .perform(
+                        get(ENTITY_API_URL_FILTER).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(recipeSearchDTO))
+                ).andExpect(status().isOk()).andReturn();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<RecipeDTO> recipeDTOList = new ArrayList(Arrays.asList(objectMapper.readValue(result.getResponse().getContentAsString(),RecipeDTO[].class)));
+        assertThat(recipeDTOList).hasSize(1);
+        assertThat(createdRecipeDTO).isEqualTo(recipeDTOList.get(0));
+    }
+
+
+    @Test
+    @Transactional
+    void getAllBySearchDTONotExists() throws Exception {
+        // Initialize the database
+        RecipeDTO createdRecipeDTO = recipeService.create(recipeDTO);
+
+        RecipeSearchDTO recipeSearchDTO = new RecipeSearchDTO();
+        List<InstructionSearchDTO> instructionSearchDTOList = new ArrayList<>();
+        instructionSearchDTOList.add(createInstructionSearchDTO("oven",false));
+        List<IngredientSearchDTO> ingredientSearchDTOS =new ArrayList<>();
+        ingredientSearchDTOS.add(createIngredientSearchDTO("potatoes",false));
+        recipeSearchDTO.setInstructions(instructionSearchDTOList);
+        recipeSearchDTO.setIngredients(ingredientSearchDTOS);
+
+        // Get all the ingredientList
+        MvcResult result = restMockMvc
+                .perform(
+                        get(ENTITY_API_URL_FILTER).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(recipeSearchDTO))
+                ).andExpect(status().isOk()).andReturn();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<RecipeDTO> recipeDTOList = new ArrayList(Arrays.asList(objectMapper.readValue(result.getResponse().getContentAsString(),RecipeDTO[].class)));
+        assertThat(recipeDTOList).hasSize(0);
+    }
     @Test
     @Transactional
     void getRecipe() throws Exception {

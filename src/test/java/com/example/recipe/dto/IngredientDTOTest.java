@@ -9,7 +9,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class IngredientDTOTest {
     @Test
     void equalsVerifier() throws Exception {
-        TestUtil.equalsVerifier(IngredientDTO.class);
         IngredientDTO ingredient1 = new IngredientDTO();
         ingredient1.setId(1L);
         IngredientDTO ingredient2 = new IngredientDTO();

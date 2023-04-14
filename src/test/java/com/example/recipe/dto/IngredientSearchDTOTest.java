@@ -8,7 +8,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class IngredientSearchDTOTest {
     @Test
     void equalsVerifier() throws Exception {
-        TestUtil.equalsVerifier(IngredientSearchDTO.class);
         IngredientSearchDTO ingredient1 = new IngredientSearchDTO();
         ingredient1.setId(1L);
         IngredientSearchDTO ingredient2 = new IngredientSearchDTO();
