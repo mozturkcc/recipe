@@ -11,13 +11,13 @@ public class InstructionSearchDTOTest {
     void equalsVerifier() throws Exception {
         TestUtil.equalsVerifier(Instruction.class);
         InstructionSearchDTO instruction1 = new InstructionSearchDTO();
-        instruction1.setId(1L);
+        instruction1.setInstruction("a");
         InstructionSearchDTO instruction2 = new InstructionSearchDTO();
-        instruction2.setId(instruction1.getId());
+        instruction2.setInstruction(instruction1.getInstruction());
         assertThat(instruction1).isEqualTo(instruction2);
-        instruction2.setId(2L);
+        instruction2.setInstruction("b");
         assertThat(instruction1).isNotEqualTo(instruction2);
-        instruction1.setId(null);
+        instruction1.setInstruction(null);
         assertThat(instruction1).isNotEqualTo(instruction2);
     }
 }

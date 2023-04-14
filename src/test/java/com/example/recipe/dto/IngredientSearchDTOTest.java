@@ -9,13 +9,13 @@ public class IngredientSearchDTOTest {
     @Test
     void equalsVerifier() throws Exception {
         IngredientSearchDTO ingredient1 = new IngredientSearchDTO();
-        ingredient1.setId(1L);
+        ingredient1.setName("a");
         IngredientSearchDTO ingredient2 = new IngredientSearchDTO();
-        ingredient2.setId(ingredient1.getId());
+        ingredient2.setName(ingredient1.getName());
         assertThat(ingredient1).isEqualTo(ingredient2);
-        ingredient2.setId(2L);
+        ingredient2.setName("b");
         assertThat(ingredient1).isNotEqualTo(ingredient2);
-        ingredient1.setId(null);
+        ingredient1.setName(null);
         assertThat(ingredient1).isNotEqualTo(ingredient2);
     }
 }
