@@ -21,9 +21,12 @@ public class InstructionService {
     public boolean exists(InstructionDTO instructionDTO){
         boolean exists = false;
         Long id = instructionDTO.getId();
-
+        String instruction = instructionDTO.getInstruction();
         if(id != null && instructionRepository.existsById(id)){
             exists = true;
+        }
+        if (instruction != null && instructionRepository.existsByInstruction(instruction)){
+            exists =true;
         }
         return exists;
     }

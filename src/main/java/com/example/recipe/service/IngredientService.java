@@ -4,6 +4,7 @@ import com.example.recipe.domain.Ingredient;
 import com.example.recipe.dto.IngredientDTO;
 import com.example.recipe.mapper.IngredientMapper;
 import com.example.recipe.repository.IngredientRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 public class IngredientService {
     IngredientRepository ingredientRepository;
 
+    @Autowired
     public IngredientService(IngredientRepository ingredientRepository) {
         this.ingredientRepository = ingredientRepository;
     }
@@ -21,8 +23,12 @@ public class IngredientService {
     public boolean exists(IngredientDTO ingredientDTO){
         boolean exists = false;
         Long id = ingredientDTO.getId();
+        String name = ingredientDTO.getName();
 
         if(id != null && ingredientRepository.existsById(id)){
+            exists = true;
+        }
+        if(name != null && ingredientRepository.existsByName(name)){
             exists = true;
         }
         return exists;

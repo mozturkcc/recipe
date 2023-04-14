@@ -7,10 +7,13 @@ import com.example.recipe.dto.RecipeDTO;
 import com.example.recipe.dto.RecipeSearchDTO;
 import com.example.recipe.service.RecipeService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -72,6 +75,40 @@ public class RecipeController {
                     .body(null);
         }
     }
+
+    /**
+     * {@code PATCH  /recipe/:id} : Partial updates given fields of an existing recipe, field will ignore if it is null
+     *
+     * @param id the id of the recipeDTO to save.
+     * @param recipeDTO the recipeDTO to update.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the updated recipeDTO,
+     * or with status {@code 400 (Bad Request)} if the recipeDTO is not valid or not found,
+     * or with status {@code 500 (Internal Server Error)} if the recipeDTO couldn't be updated.
+     * @throws URISyntaxException if the Location URI syntax is incorrect.
+     */
+    @PatchMapping(value = "/recipe/{id}", consumes = { "application/json", "application/merge-patch+json" })
+    public ResponseEntity<RecipeDTO> partialUpdateRecipe(
+            @PathVariable(value = "id", required = false) final Long id,
+            @NotNull @RequestBody RecipeDTO recipeDTO
+    ) {
+        if(id != null && id.equals(recipeDTO.getId()) && recipeService.exists(recipeDTO)) {
+
+
+            RecipeDTO result = recipeService.partialUpdate(recipeDTO);
+
+            return ResponseEntity
+                    .ok()
+                    .headers(HeaderUtility.createEntityUpdateAlert("recipe", result.getId().toString()))
+                    .body(result);
+        } else {
+            return ResponseEntity
+                    .badRequest()
+                    .headers(HeaderUtility.createFailureAlert("recipe", "idNOTexists", "The entity to be updated does not exists"))
+                    .body(null);
+        }
+    }
+
+
     /**
      * {@code GET  /recipe} : get all the recipe.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of recipes in body.
@@ -94,7 +131,13 @@ public class RecipeController {
     }
 
     /**
-     * {@code GET  /recipe/type/:type} : get all the recipe which has given type.
+     * {@code GET  /recipe/filter} : get all the recipe whith given filter.
+     * @param searchDTO to search recipes. You can add ingrideints and instructions for search. Search
+     *                  will be positive if your search text found in the recipe records.
+     *                  You can arrange search by contains flag in the ingredient or instruction.
+     *                  If the flag is false search will return the recipes does not contain "the text".
+     *                  Also typeEquals flag is for the recipe type match: VEGAN,VEGETARIAN etc.
+     *                  Search will return the recipes which has type equals to the given type if the flag is true and vice verse.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of recipes in body.
      */
     @GetMapping("/recipe/filter")
